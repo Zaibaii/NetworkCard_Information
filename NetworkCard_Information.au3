@@ -1,11 +1,10 @@
-#NoTrayIcon
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Data\Image\Icon.ico
 #AutoIt3Wrapper_Outfile=Release\NetworkCard_Information.Exe
 #AutoIt3Wrapper_Outfile_x64=Release\NetworkCard_Information_x64.Exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_Res_Description=NetworkCard Information
-#AutoIt3Wrapper_Res_Fileversion=1.0.0.0
+#AutoIt3Wrapper_Res_Fileversion=1.0
 #AutoIt3Wrapper_Res_LegalCopyright=Copyright (C) 2020-2025 Zaibai Software Production
 #AutoIt3Wrapper_Res_Language=1036
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -19,6 +18,7 @@
 #include <EditConstants.au3>
 
 ;Option
+#NoTrayIcon
 OnAutoItExitRegister("_Quit")
 Opt("WinTitleMatchMode", 3) ;Exact title match (pour If ProcessExists($PIDini) And WinExists($TITLE))
 Opt("GUIResizeMode", 802)
@@ -49,7 +49,7 @@ IniWrite($INI_SETTING, "Paramètres", "PID", @AutoItPID)
 #ce
 
 ;Check Version/Installation
-Dim $CheckVersion = IniRead($INI_SETTING, "Paramètres", "Version", "null")
+Local $CheckVersion = IniRead($INI_SETTING, "Paramètres", "Version", "null")
 If $CheckVersion <> $VERSION Or Not FileExists($DIR_INSTALL) Then _Install()
 
 ;Chargement du fichier $INI_SETTING
