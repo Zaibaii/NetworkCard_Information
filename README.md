@@ -5,6 +5,8 @@ Dans ce projet, vous trouverez la version principale écrite en AutoIt qui dispo
 
 En bonus, vous trouverez les versions des scripts Batch et Powershell.
 
+
+
 ## [EN]
 NetworkCard_Information lists the network settings for your network cards/connections.
 
