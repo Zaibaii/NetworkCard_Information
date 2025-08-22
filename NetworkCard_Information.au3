@@ -1,7 +1,7 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=Data\Image\Icon.ico
-#AutoIt3Wrapper_Outfile=Release\NetworkCard_Information.Exe
-#AutoIt3Wrapper_Outfile_x64=Release\NetworkCard_Information_x64.Exe
+#AutoIt3Wrapper_Outfile=Release\NetworkCard_Information.exe
+#AutoIt3Wrapper_Outfile_x64=Release\NetworkCard_Information_x64.exe
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_Res_Description=NetworkCard Information
 #AutoIt3Wrapper_Res_Fileversion=1.0

@@ -91,6 +91,10 @@ Func _RatioFont($iDPIDef = 96) ;Gère la taille de l'écriture en fonction du DPI 
     Return $aResults
 EndFunc
 
+Func _DisableTabFocus($hCtrl) ;Désactive le focus du controle via la touche tabulation (désactive $WS_TABSTOP)
+	_WinAPI_SetWindowLong($hCtrl, $GWL_STYLE, BitAND(_WinAPI_GetWindowLong($hCtrl, $GWL_STYLE), BitNOT($WS_TABSTOP)))
+EndFunc
+
 ; ###############################################################
 ; ################## Internal use only ##########################
 ; ###############################################################
