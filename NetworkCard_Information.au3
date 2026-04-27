@@ -1,12 +1,15 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
-#AutoIt3Wrapper_Icon=Data\Image\Icon.ico
-#AutoIt3Wrapper_Outfile=Release\NetworkCard_Information.exe
-#AutoIt3Wrapper_Outfile_x64=Release\NetworkCard_Information_x64.exe
+#AutoIt3Wrapper_Icon=Data\Picture\Icon.ico
+#AutoIt3Wrapper_Outfile=Release\NetworkCard_Information_x86.exe
+#AutoIt3Wrapper_Outfile_x64=Release\NetworkCard_Information.exe
 #AutoIt3Wrapper_Compile_Both=y
+#AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=NetworkCard Information
-#AutoIt3Wrapper_Res_Fileversion=1.0
-#AutoIt3Wrapper_Res_LegalCopyright=Copyright (C) 2020-2025 Zaibai Software Production
-#AutoIt3Wrapper_Res_Language=1036
+#AutoIt3Wrapper_Res_Fileversion=1.0.1.0
+#AutoIt3Wrapper_Res_LegalCopyright=Copyright (C) 2020-2030 Zaibai Software Production
+#AutoIt3Wrapper_Res_Field=Nom Interne|NetworkCard Information
+#AutoIt3Wrapper_Res_Field=Créer par|Zaibai
+#AutoIt3Wrapper_Res_Field=Email|erwan-91310@hotmail.fr
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
 ;Include
@@ -20,26 +23,26 @@
 ;Option
 #NoTrayIcon
 OnAutoItExitRegister("_Quit")
-Opt("WinTitleMatchMode", 3) ;Exact title match (pour If ProcessExists($PIDini) And WinExists($TITLE))
+Opt("WinTitleMatchMode", 3) ;Exact title match (pour If ProcessExists($sIni_PID) And WinExists($S_TITLE))
 Opt("GUIResizeMode", 802)
 Opt("GUIOnEventMode", 1)
 
 ;Variable Constante
-Dim $TITLE = "NetworkCard Information"
-Dim $VERSION = "1.0"
+Dim $S_TITLE = "NetworkCard Information"
+Dim $S_VERSION = "1.0.1"
 
 ;Variable Constante - Fichier
-Dim $DIR_INSTALL = @AppDataDir & "\" & $TITLE & "\"
+Dim $DIR_INSTALL = @AppDataDir & "\" & $S_TITLE & "\"
 Dim $DIR_DATA = $DIR_INSTALL & "Data\"
-Dim $DIR_IMAGE = $DIR_DATA & "Image\"
+Dim $DIR_PICTURE = $DIR_DATA & "Picture\"
 Dim $INI_SETTING = $DIR_INSTALL & "paramètres.ini"
 
 #cs
 ;Check si une instance du programme est déjà en cours
 Dim $bPIDExit = False
 Local $PIDini = IniRead($INI_SETTING, "Paramètres", "PID", "null")
-If ProcessExists($PIDini) And WinExists($Title) Then
-	If MsgBox(4 + 32 + 256 + 262144, "Programme déjà lancé", 'Nous avons détecté que ' & $Title & ' est déjà lancé.' & @CRLF & $Title & ' est limité à une instance. Voulez-vous arrêter la première instance ?') = 7 Then
+If ProcessExists($PIDini) And WinExists($S_TITLE) Then
+	If MsgBox(4 + 32 + 256 + 262144, "Programme déjà lancé", 'Nous avons détecté que ' & $S_TITLE & ' est déjà lancé.' & @CRLF & $S_TITLE & ' est limité à une instance. Voulez-vous arrêter la première instance ?') = 7 Then
 		$bPIDExit = True
 		Exit
 	EndIf
@@ -49,12 +52,12 @@ IniWrite($INI_SETTING, "Paramètres", "PID", @AutoItPID)
 #ce
 
 ;Check Version/Installation
-Local $CheckVersion = IniRead($INI_SETTING, "Paramètres", "Version", "null")
-If $CheckVersion <> $VERSION Or Not FileExists($DIR_INSTALL) Then _Install()
+Local $sIni_CheckVersion = IniRead($INI_SETTING, "Paramètres", "Version", "null")
+If $sIni_CheckVersion <> $S_VERSION Or Not FileExists($DIR_INSTALL) Then _Install()
 
 ;Chargement du fichier $INI_SETTING
-Dim $Ini_XPos = IniRead($INI_SETTING, "Paramètres", "XPos", -1)
-Dim $Ini_YPos = IniRead($INI_SETTING, "Paramètres", "YPos", -1)
+Dim $sIni_XPos = IniRead($INI_SETTING, "Paramètres", "XPos", -1)
+Dim $sIni_YPos = IniRead($INI_SETTING, "Paramètres", "YPos", -1)
 
 ;Variable utilisé dans diverses fonctions
 Dim $aInfoNetworkAdapter = _GetNetworkAdapterInfosModif() ;Récupération des informations réseaux (besoin pour la construction de la GUI)
@@ -67,11 +70,12 @@ Dim $CtrlButtonNetworkClick = 0, $bUpdateNetworkInfoFunc = False
 
 ;Création de la GUI
 _NoFocusLines_Global_Set() ;Avant création de la GUI pour tout les contrôles OU _NoFocusLines_Set($ControlID) après création de la GUI
-Global $GUIP = GUICreate($TITLE, 380, 45 + (85 * $iNbrNetworkAdapter), $Ini_XPos, $Ini_YPos, $WS_POPUP)
+Global $hGUIP = GUICreate($S_TITLE, 380, 45 + (85 * $iNbrNetworkAdapter), $sIni_XPos, $sIni_YPos, $WS_POPUP)
 GUISetFont(8.5 * _RatioFont()[0])
-GUISetIcon($DIR_IMAGE & "Icon.ico")
+GUISetIcon($DIR_PICTURE & "Icon.ico")
 GUISetBkColor("0xb6e1f4")
-_WinAPI_SetWindowRgn($GUIP, _WinAPI_CreateRoundRectRgn(0, 0, 380, 45 + (85 * $iNbrNetworkAdapter), 15, 15)) ;Arrondis les bords de la GUI
+_WinAPI_SetWindowRgn($hGUIP, _WinAPI_CreateRoundRectRgn(0, 0, 380, 45 + (85 * $iNbrNetworkAdapter), 15, 15)) ;Arrondis les bords de la GUI
+GUISetOnEvent($GUI_EVENT_CLOSE, "_GuiClose")
 
 ;GUI - Background menu
 GUICtrlCreateLabel("", 0, 0, 380, 25)
@@ -80,16 +84,16 @@ GUICtrlSetState(-1, $GUI_DISABLE)
 
 ;GUI - Icon menu
 GUICtrlCreatePic('', 3, 1, 23, 23, Default, $GUI_WS_EX_PARENTDRAG)
-_SetImage(-1, $DIR_IMAGE & "Icon.ico")
+_SetImage(-1, $DIR_PICTURE & "Icon.ico")
 
 ;GUI - Label Title
-GUICtrlCreateLabel("  " & $TITLE, 25, 2, 292, 25, Default, $GUI_WS_EX_PARENTDRAG)
+GUICtrlCreateLabel("  " & $S_TITLE, 25, 2, 292, 25, Default, $GUI_WS_EX_PARENTDRAG)
 GUICtrlSetBkColor(-1, $GUI_BKCOLOR_TRANSPARENT)
 GUICtrlSetFont(-1, 14 * _RatioFont()[0])
 GUICtrlSetColor(-1, "0xFFFFFF")
 
 ;GUI - Gif refresh
-$GifRefresh = _GUICtrlCreateGIF($DIR_IMAGE & "Refresh.GIF", "", 315, 2)
+$GifRefresh = _GUICtrlCreateGIF($DIR_PICTURE & "Refresh.GIF", "", 315, 2)
 GUICtrlSetTip($GifRefresh, "Actualiser les informations réseaux")
 _GIF_PauseAnimation($GifRefresh)
 GUICtrlSetOnEvent(-1, "_UpdateNetworkInfo")
@@ -118,15 +122,14 @@ GUICtrlSetBkColor(-1, "0x000000")
 _GuiButtonNetwork(True)
 
 ;Lancement de la GUI
-GUISetOnEvent($GUI_EVENT_CLOSE, "_GuiClose")
 GUISetState(@SW_SHOW)
 GUIRegisterMsg($WM_MOVE, "_WMGuiMoveSave")
 AdlibRegister("_UpdateNetworkInfo", 60000)
 
-;Boucle Principal
+;Boucle Principale
 While 1
-	If $CtrlButtonNetworkClick <> 0 Then _GuiInfos($CtrlButtonNetworkClick)
 	Sleep(20)
+	If $CtrlButtonNetworkClick <> 0 Then _GuiInfos($CtrlButtonNetworkClick)
 Wend
 
 Func _GuiButtonNetwork($bCreate = False)
@@ -143,10 +146,10 @@ Func _GuiButtonNetwork($bCreate = False)
 				$sColor = "Black"
 		EndSwitch
 		If $bCreate Then
-			$aNetworkButtonImg[$i][0] = _3StatPic_Create($DIR_IMAGE & $sColor & "1.png", 5, 40 + (85 * $i), "", $DIR_IMAGE & $sColor & "3.png", "", "", "", Default, Default, $aInfoNetworkAdapter[$i][0], 14, 9, "", 300)
+			$aNetworkButtonImg[$i][0] = _3StatPic_Create($DIR_PICTURE & $sColor & "1.png", 5, 40 + (85 * $i), "", $DIR_PICTURE & $sColor & "3.png", "", "", "", Default, Default, $aInfoNetworkAdapter[$i][0], 14, 9, "", 300)
 			$aNetworkButtonImg[$i][1] = $sColor
 		ElseIf $aNetworkButtonImg[$i][1] <> $sColor Then
-			_3StatPic_ChangeImg($aNetworkButtonImg[$i][0], $DIR_IMAGE & $sColor & "1.png", $DIR_IMAGE & $sColor & "1.png", $DIR_IMAGE & $sColor & "3.png")
+			_3StatPic_ChangeImg($aNetworkButtonImg[$i][0], $DIR_PICTURE & $sColor & "1.png", $DIR_PICTURE & $sColor & "1.png", $DIR_PICTURE & $sColor & "3.png")
 			$aNetworkButtonImg[$i][1] = $sColor
 		EndIf
 	Next
@@ -178,21 +181,21 @@ Func _GuiInfos($Ctrl)
 
 	If Not WinExists($aInfoNetworkAdapter[$iLine][0] & " - " & $aInfoNetworkAdapter[$iLine][2]) Then
 
-		;Récupère l'emplacement de la $GUIP si ça position actuelle = -1 (centrer)
-		If $Ini_XPos = -1 Or $Ini_YPos = -1 Then
-			Local $aWPos = WinGetPos($GUIP)
+		;Récupère l'emplacement de la $hGUIP si ça position actuelle = -1 (centrer)
+		If $sIni_XPos = -1 Or $sIni_YPos = -1 Then
+			Local $aWPos = WinGetPos($hGUIP)
 			If IsArray($aWPos) Then
 				IniWrite($INI_SETTING, "Paramètres", "XPos", $aWPos[0])
 				IniWrite($INI_SETTING, "Paramètres", "YPos", $aWPos[1])
-				$Ini_XPos = $aWPos[0]
-				$Ini_YPos = $aWPos[1]
+				$sIni_XPos = $aWPos[0]
+				$sIni_YPos = $aWPos[1]
 			EndIf
 		EndIf
 
 		;Création de la GUI Info
-		$aGuiInfo[$iLine][0] = GUICreate($aInfoNetworkAdapter[$iLine][0] & " - " & $aInfoNetworkAdapter[$iLine][2], 530, 440, 384 + (40*$iLine), 3 + (26*$iLine), $WS_POPUP, $WS_EX_MDICHILD, $GUIP)
+		$aGuiInfo[$iLine][0] = GUICreate($aInfoNetworkAdapter[$iLine][0] & " - " & $aInfoNetworkAdapter[$iLine][2], 530, 440, 384 + (40*$iLine), 3 + (26*$iLine), $WS_POPUP, $WS_EX_MDICHILD, $hGUIP)
 		GUISetFont(12 * _RatioFont()[0])
-		GUISetIcon($DIR_IMAGE & "Icon.ico")
+		GUISetIcon($DIR_PICTURE & "Icon.ico")
 		GUISetBkColor("0xb6e1f4")
 		_WinAPI_SetWindowRgn($aGuiInfo[$iLine][0], _WinAPI_CreateRoundRectRgn(0, 0, 530, 440, 15, 15)) ;Arrondis les bords de la GUI
 
@@ -203,7 +206,7 @@ Func _GuiInfos($Ctrl)
 
 		;Icon menu
 		GUICtrlCreatePic('', 3, 1, 23, 23, Default, $GUI_WS_EX_PARENTDRAG)
-		_SetImage(-1, $DIR_IMAGE & "Icon.ico")
+		_SetImage(-1, $DIR_PICTURE & "Icon.ico")
 
 		;Label Title
 		GUICtrlCreateLabel("  " & $aInfoNetworkAdapter[$iLine][0] & " - " & $aInfoNetworkAdapter[$iLine][2], 25, 2, 470, 25, Default, $GUI_WS_EX_PARENTDRAG)
@@ -255,7 +258,7 @@ Func _UpdateNetworkInfo()
 
 	;Check si le nombre de cartes réseau n'a pas changé depuis le lancement du programme
 	If $iNbrNetworkAdapterNow <> $iNbrNetworkAdapter Then
-		MsgBox(48, "Connexions réseau - Changement détecté", "Nous avons détecté des ajouts ou supressions de carte réseaux, " & $TITLE & " va redémarrer afin de mettre à jour les données.", 60, $GUIP)
+		MsgBox(48, "Connexions réseau - Changement détecté", "Nous avons détecté des ajouts ou supressions de carte réseaux, " & $S_TITLE & " va redémarrer afin de mettre à jour les données.", 60, $hGUIP)
 		_GIF_PauseAnimation($GifRefresh)
 		ShellExecute('"' & @ScriptFullPath & '"')
 		_GuiClose()
@@ -304,8 +307,8 @@ EndFunc
 
 Func _Install()
 	;Récupération de valeur de $INI_SETTING (utile en cas de MAJ)
-	Local $IniR_XPos = IniRead($INI_SETTING, "Paramètres", "XPos", -1)
-	Local $IniR_YPos = IniRead($INI_SETTING, "Paramètres", "YPos", -1)
+	Local $sIniI_XPos = IniRead($INI_SETTING, "Paramètres", "XPos", -1)
+	Local $sIniI_YPos = IniRead($INI_SETTING, "Paramètres", "YPos", -1)
 
 	;Suppression de donnée
 	DirRemove($DIR_INSTALL, 1)
@@ -314,35 +317,35 @@ Func _Install()
 	;Création de dossier
 	DirCreate($DIR_INSTALL)
 	DirCreate($DIR_DATA)
-	DirCreate($DIR_IMAGE)
+	DirCreate($DIR_PICTURE)
 
 	;Installation de fichier
-	FileInstall(".\Data\Image\Icon.ico", $DIR_IMAGE & "Icon.ico")
-	FileInstall(".\Data\Image\Refresh.gif", $DIR_IMAGE & "Refresh.gif")
-	FileInstall(".\Data\Image\Black1.png", $DIR_IMAGE & "Black1.png")
-	FileInstall(".\Data\Image\Black3.png", $DIR_IMAGE & "Black3.png")
-	FileInstall(".\Data\Image\Green1.png", $DIR_IMAGE & "Green1.png")
-	FileInstall(".\Data\Image\Green3.png", $DIR_IMAGE & "Green3.png")
-	FileInstall(".\Data\Image\Orange1.png", $DIR_IMAGE & "Orange1.png")
-	FileInstall(".\Data\Image\Orange3.png", $DIR_IMAGE & "Orange3.png")
+	FileInstall(".\Data\Picture\Icon.ico", $DIR_PICTURE & "Icon.ico")
+	FileInstall(".\Data\Picture\Refresh.gif", $DIR_PICTURE & "Refresh.gif")
+	FileInstall(".\Data\Picture\Black1.png", $DIR_PICTURE & "Black1.png")
+	FileInstall(".\Data\Picture\Black3.png", $DIR_PICTURE & "Black3.png")
+	FileInstall(".\Data\Picture\Green1.png", $DIR_PICTURE & "Green1.png")
+	FileInstall(".\Data\Picture\Green3.png", $DIR_PICTURE & "Green3.png")
+	FileInstall(".\Data\Picture\Orange1.png", $DIR_PICTURE & "Orange1.png")
+	FileInstall(".\Data\Picture\Orange3.png", $DIR_PICTURE & "Orange3.png")
 
 	;Restauration de valeur de $INI_SETTING (utile en cas de MAJ)
-	IniWrite($INI_SETTING, "Paramètres", "Version", $VERSION)
-	IniWrite($INI_SETTING, "Paramètres", "XPos", $IniR_XPos)
-	IniWrite($INI_SETTING, "Paramètres", "YPos", $IniR_YPos)
+	IniWrite($INI_SETTING, "Paramètres", "Version", $S_VERSION)
+	IniWrite($INI_SETTING, "Paramètres", "XPos", $sIniI_XPos)
+	IniWrite($INI_SETTING, "Paramètres", "YPos", $sIniI_YPos)
 EndFunc
 
-Func _WMGuiMoveSave($hWnd, $nMsg, $wParam, $lParam)
-	#forceref $hWnd, $nMsg, $wParam, $lParam
+Func _WMGuiMoveSave($hWnd, $iMsg, $wParam, $lParam)
+	#forceref $hWnd, $iMsg, $wParam, $lParam
 
-	;Enregistre l'emplacement de la $GUIP
-	If $hWnd <> $GUIP Or StringRegExp($lParam, '(83008300)') Then Return $GUI_RUNDEFMSG ;83008300 correspond à "l'emplacement" quand on réduit la GUI (donc emplacement à ne pas enregistrer).
+	;Enregistre l'emplacement de la $hGUIP
+	If $hWnd <> $hGUIP Or StringRegExp($lParam, '(83008300)') Then Return $GUI_RUNDEFMSG ;83008300 correspond à "l'emplacement" quand on réduit la GUI (donc emplacement à ne pas enregistrer)
     Local $aWPos = WinGetPos($hWnd)
     If IsArray($aWPos) Then
 		IniWrite($INI_SETTING, "Paramètres", "XPos", $aWPos[0])
 		IniWrite($INI_SETTING, "Paramètres", "YPos", $aWPos[1])
-		$Ini_XPos = $aWPos[0]
-        $Ini_YPos = $aWPos[1]
+        $sIni_XPos = $aWPos[0]
+        $sIni_YPos = $aWPos[1]
     EndIf
 	Return $GUI_RUNDEFMSG
 EndFunc
@@ -354,12 +357,11 @@ EndFunc
 Func _GuiClose()
 	If IsDeclared("GUIP") Then
 		AdlibUnRegister("_UpdateNetworkInfo")
-		GUISetState(@SW_HIDE, $GUIP)
+		GUISetState(@SW_HIDE, $hGUIP)
 		For $i = 0 To UBound($aGuiInfo) - 1
 			If IsHWnd($aGuiInfo[$i][0]) And WinExists($aGuiInfo[$i][0]) Then GUISetState(@SW_HIDE, $aGuiInfo[$i][0])
 		Next
 	EndIf
-	_NoFocusLines_Global_Exit()
 	Exit
 EndFunc
 
@@ -371,7 +373,9 @@ Func _Quit()
 	#cs
 	If Not $bPIDExit Then IniWrite($INI_SETTING, "Paramètres", "PID", "null")
 	#ce
+	_NoFocusLines_Global_Exit()
 EndFunc
 
 ;Amélioration possible:
-;Modifier la gui "en live" si changement de nombre de carte/connexion réseau.
+;Modifier la gui "en live" si changement de nombre de carte/connexion réseau
+;Ajouter la langue Anglaise
